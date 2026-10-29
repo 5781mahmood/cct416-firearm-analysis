@@ -18,7 +18,11 @@ env/
 .idea/
 .vscode/
 
-# Tables the notebook writes on run
+# Regenerable tables the notebook writes on run
 neighbourhood_summary.csv
 yearly_summary.csv
 event_summary.csv
+sql_neighbourhood_summary.csv
+
+# Local helper (optional); keep notebook as source of truth
+build_notebook.py
