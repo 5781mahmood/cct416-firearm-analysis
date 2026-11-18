@@ -1,82 +1,70 @@
 # Toronto Firearm Incident Analysis
 
-CCT416 project analyzing Toronto Police Service open data on shootings and firearm discharges.
+Mahmood Sultan - CCT416, University of Toronto Mississauga, May-Jun 2026 (solo)
+
+Analysis of Toronto Police Service open data on shootings and firearm discharges.
 
 **Stack:** Python · Pandas · Matplotlib · DuckDB (SQL) · Jupyter
 
-**Repo:** [github.com/5781mahmood/cct416-firearm-analysis](https://github.com/5781mahmood/cct416-firearm-analysis)
-
----
+**Repository:** [github.com/5781mahmood/cct416-firearm-analysis](https://github.com/5781mahmood/cct416-firearm-analysis)
 
 ## Research question
 
-Do neighbourhoods with the **most firearm-related incidents** also have the **most harm** (injuries + deaths), or does “high risk” change when we switch from counting events to measuring severity?
-
----
+Do neighbourhoods with the most firearm-related incidents also have the most harm (injuries + deaths), or does the ranking change when severity is measured instead of event counts?
 
 ## Data source
 
-- **Provider:** Toronto Police Service Public Safety Data Portal  
-- **Dataset:** [Shooting and Firearm Discharges Open Data](https://data.torontopolice.on.ca/datasets/TorontoPS::shooting-and-firearm-discharges-open-data/about)  
-- **Local file:** `shooting_firearm_discharges.csv`  
-- **Geography used:** `NEIGHBOURHOOD_158` (City of Toronto 158 neighbourhoods)  
-- **Period in this file (after cleaning):** 2004–2026  
+- **Dataset:** [Shooting and Firearm Discharges](https://data.torontopolice.on.ca/datasets/TorontoPS::shooting-and-firearm-discharges-open-data/about), Toronto Police Service Public Safety Data Portal
+- **File:** `shooting_firearm_discharges.csv`
+- **Geography:** `NEIGHBOURHOOD_158` (City of Toronto 158 neighbourhoods)
+- **Coverage:** incidents dated January 1, 2004 to March 30, 2026
+- **Licence:** [Open Government Licence – Ontario](https://www.tps.ca/data-maps/resources/licence/)
 
-See [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md) for field definitions.
+Contains information licensed under the Open Government Licence – Ontario.
 
----
+Field definitions are in [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md).
 
 ## Method
 
-1. **Load & profile** the CSV (shape, dtypes, missingness).  
-2. **Clean:** coerce numeric fields, drop incomplete rows, remove `NSA` (Not Specified Area) geography so neighbourhood rankings are not distorted.  
-3. **Engineer** `total_harm = INJURIES + DEATH`.  
-4. **Pandas aggregations:** neighbourhood / year / event-type summaries; Top-10 by incidents, total harm, and harm-per-incident.  
-5. **Visualize** and save PNGs to [`charts/`](charts/).  
-6. **DuckDB SQL:** register the cleaned table, rebuild the same Top-10 rankings with `GROUP BY` / `ORDER BY` / `LIMIT`, then `JOIN` two CTEs to list neighbourhoods that appear in both Top-10 lists.  
-7. **Validate** that Pandas and SQL Top-10 incident rankings match before reporting findings.
+1. Load the CSV and check shape, dtypes, and missing values.
+2. Coerce numeric fields, drop incomplete rows, and remove `NSA` (Not Specified Area) so those rows are not treated as a neighbourhood.
+3. Define `total_harm = INJURIES + DEATH`.
+4. Aggregate in Pandas by neighbourhood, year, and event type. Rank the top 10 by incidents, total harm, and harm per incident.
+5. Save the figures to [`charts/`](charts/).
+6. Register the cleaned table in DuckDB and rebuild the rankings with `GROUP BY`, `ORDER BY`, and `LIMIT`. Join the two top-10 lists with a `JOIN` of two common table expressions.
+7. Check the Pandas rankings against the SQL rankings. Eight neighbourhoods sit clearly above a three-way tie at 119 incidents (Malvern East, Regent Park, and Weston), so the last two names in a top 10 depend on how that tie is broken. The count on each of those rows is 119.
 
----
+## Key findings
 
-## Key findings (from the notebook run — not invented)
-
-After cleaning (**6,759** incidents; **70** rows removed, mostly `NSA`):
+After cleaning: **6,759** incidents (**70** rows removed, mostly `NSA`).
 
 | Metric | Value |
 |--------|------:|
 | Injuries | 3,114 |
 | Deaths | 788 |
-| Total harm (injuries + deaths) | **3,902** |
-| Correlation: neighbourhood incidents vs total harm | **0.968** |
-| Neighbourhoods in **both** Top-10 (incidents & harm) | **6** |
+| Total harm (injuries + deaths) | 3,902 |
+| Correlation: neighbourhood incidents vs total harm | 0.968 |
+| Neighbourhoods in both top 10 lists (incidents and harm) | 6 |
 
-1. **Volume and total harm move together at the neighbourhood level** (correlation **0.968**). Six places appear in both Top-10 lists: Black Creek, Glenfield-Jane Heights, West Humber-Clairville, Mount Olive-Silverstone-Jamestown, Yorkdale-Glen Park, York University Heights. Glenfield-Jane Heights leads raw volume at **347** incidents.  
-
-2. **The ranking flips under harm-per-incident.** Playter Estates-Danforth ranks first on rate (**1.83** harm per incident) but on only **12** incidents — a reminder that rate metrics are sensitive to small counts.  
-
-3. **Harm is concentrated in one event type.** Firearm discharges: **3,600** incidents with **0** recorded injuries/deaths in this file. Shootings: **3,159** incidents carrying **all** 3,114 injuries and 788 deaths.
-
-These three points are the ones to put on a resume bullet or LinkedIn post.
-
----
+1. Neighbourhood incident counts and total harm move together (correlation **0.968**). Six neighbourhoods are in both top-10 lists: Black Creek, Glenfield-Jane Heights, West Humber-Clairville, Mount Olive-Silverstone-Jamestown, Yorkdale-Glen Park, and York University Heights. Glenfield-Jane Heights has the most incidents (**347**).
+2. Harm per incident ranks a different set of neighbourhoods. Playter Estates-Danforth is first on that rate (**1.83** harm per incident) on **12** incidents.
+3. Firearm discharges account for **3,600** incidents and **0** recorded injuries or deaths in this file. Shootings account for **3,159** incidents and all **3,114** injuries and **788** deaths.
 
 ## Charts
 
-| File | What it shows |
-|------|----------------|
-| [`charts/top10_incidents.png`](charts/top10_incidents.png) | Top 10 neighbourhoods by incident count |
-| [`charts/top10_harm.png`](charts/top10_harm.png) | Top 10 by total harm |
-| [`charts/top10_harm_rate.png`](charts/top10_harm_rate.png) | Top 10 by harm per incident |
-| [`charts/incidents_vs_harm_scatter.png`](charts/incidents_vs_harm_scatter.png) | Neighbourhood incidents vs harm |
-| [`charts/incidents_by_year.png`](charts/incidents_by_year.png) | Incidents over time |
-| [`charts/harm_by_year.png`](charts/harm_by_year.png) | Harm over time |
-| [`charts/incidents_by_event_type.png`](charts/incidents_by_event_type.png) | Shootings vs firearm discharges |
+![Top 10 neighbourhoods by incident count](charts/top10_incidents.png)
 
-![Top 10 by incidents](charts/top10_incidents.png)
+*Top 10 neighbourhoods by incident count. Glenfield-Jane Heights is first, at 347 incidents.*
 
-![Incidents vs harm](charts/incidents_vs_harm_scatter.png)
+![Top 10 neighbourhoods by harm per incident](charts/top10_harm_rate.png)
 
----
+*Top 10 neighbourhoods by harm per incident. Playter Estates-Danforth is first, at 1.83 harm per incident on 12 incidents.*
+
+![Incidents by event type](charts/incidents_by_event_type.png)
+
+*Incidents by event type. Firearm discharges (3,600) outnumber shootings (3,159); recorded harm is in the shooting rows.*
+
+Other figures in `charts/`: total harm, the incidents-versus-harm scatter, and the yearly series.
 
 ## How to run
 
@@ -85,37 +73,23 @@ pip install -r requirements.txt
 jupyter notebook Toronto_Firearm_Analysis_Code.ipynb
 ```
 
-Run all cells. Charts rewrite into `charts/`. Summary CSVs (`neighbourhood_summary.csv`, etc.) are regenerable and gitignored.
-
----
+Run all cells. Figures are rewritten in `charts/`. The summary CSVs are regenerated on each run and are listed in `.gitignore`.
 
 ## Project layout
 
 ```
-├── Toronto_Firearm_Analysis_Code.ipynb   # full analysis + teaching notes + SQL
-├── shooting_firearm_discharges.csv       # source data
-├── charts/                               # PNG outputs for portfolio / README
-├── DATA_DICTIONARY.md                    # field definitions
+├── Toronto_Firearm_Analysis_Code.ipynb
+├── shooting_firearm_discharges.csv
+├── charts/
+├── DATA_DICTIONARY.md
 ├── requirements.txt
 └── README.md
 ```
 
----
-
 ## Limitations
 
-- Administrative open data — reporting rules and definitions can change across years.  
-- Dropping `NSA` improves neighbourhood ranking quality but excludes incidents with unclear geography.  
-- Harm-per-incident on small counts is unstable.  
-- Correlation is descriptive, not causal.  
-- Results depend on choosing `NEIGHBOURHOOD_158` (an alternative 140 geography also exists in the file).
-
----
-
-## Skills demonstrated (interview / resume)
-
-- Data cleaning & metric design on real public-safety open data  
-- Exploratory analysis with **Pandas** (`groupby`, ranking, correlation)  
-- Analytical **SQL** in **DuckDB** (`GROUP BY`, `ORDER BY`, `LIMIT`, CTE + `INNER JOIN`) with Pandas cross-check  
-- Clear visualization + reproducible chart exports  
-- Transparent limitations and documentation
+- The source is administrative open data. Reporting rules and definitions can change across years.
+- Dropping `NSA` excludes incidents with no neighbourhood label.
+- Harm per incident is unstable when the incident count is small.
+- The correlation describes neighbourhood totals. It is not a causal estimate.
+- Rankings use `NEIGHBOURHOOD_158`. The file also contains the 140-neighbourhood geography.
