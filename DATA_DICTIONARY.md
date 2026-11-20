@@ -1,12 +1,12 @@
 # Data dictionary
 
-Source: [Toronto Police Service — Shooting and Firearm Discharges Open Data](https://data.torontopolice.on.ca/datasets/TorontoPS::shooting-and-firearm-discharges-open-data/about)
+Source: [Toronto Police Service - Shooting and Firearm Discharges Open Data](https://data.torontopolice.on.ca/datasets/TorontoPS::shooting-and-firearm-discharges-open-data/about)
 
 Local file: `shooting_firearm_discharges.csv`
 
 ## Fields used in this analysis
 
-| Column | Type (approx.) | Meaning | How we use it |
+| Column | Type (approx.) | Meaning | How it is used |
 |--------|----------------|---------|----------------|
 | `OCC_YEAR` | integer | Year the incident occurred | Time trends; coerced numeric |
 | `NEIGHBOURHOOD_158` | string | Neighbourhood name + code (158 geography) | Primary geography for rankings; rows labeled `NSA` are dropped |
@@ -36,9 +36,9 @@ Local file: `shooting_firearm_discharges.csv`
 
 ## Cleaning rules applied in the notebook
 
-1. Coerce `OCC_YEAR`, `INJURIES`, `DEATH` to numeric (`errors="coerce"`).  
-2. Drop rows missing year, injuries, death, or neighbourhood.  
-3. Drop rows where `NEIGHBOURHOOD_158 == "NSA"`.  
+1. Coerce `OCC_YEAR`, `INJURIES`, `DEATH` to numeric (`errors="coerce"`).
+2. Drop rows missing year, injuries, death, or neighbourhood.
+3. Drop rows where `NEIGHBOURHOOD_158 == "NSA"`.
 4. Compute `total_harm`.
 
-After cleaning in this project’s run: **6,759** incidents remaining from **6,829** raw rows (**70** removed).
+After cleaning in this project's run: **6,759** incidents remaining from **6,829** raw rows (**70** removed).
